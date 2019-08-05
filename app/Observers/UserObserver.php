@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Profile;
 use App\User;
 use Illuminate\Support\Facades\Mail;
 
@@ -16,8 +17,7 @@ class UserObserver
     public function created(User $user)
     {
         //
-
-
+        Profile::create(['user_uuid' => $user->uuid]);
 
     }
 

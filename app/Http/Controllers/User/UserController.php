@@ -62,7 +62,11 @@ class UserController extends Controller
         $data = $request->only('name', 'email', 'password');
         $user = User::createUser($data);
         event(new Registration($user->email, $user->name));
-        return response()->json($user);
+        return response()->json([
+            'data' => $user,
+            'success' => true,
+            'message' => 'Registration complete please check email to continue registration'
+        ]);
 
     }
 

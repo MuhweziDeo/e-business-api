@@ -28,4 +28,16 @@ class Helpers
             return ['errors' => $validate->errors()];
         }
     }
+
+    static function encode_string($string)
+    {
+
+        return base64_encode($string);
+    }
+
+    static function decode_string($encoded_string)
+    {
+
+        return base64_decode($encoded_string);
+    }
 }

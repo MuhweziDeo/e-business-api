@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Helpers\Helpers;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Str;
@@ -67,14 +68,17 @@ class User extends Authenticatable
         return Str::random(40);
     }
 
+    /**
+     * @param array $data
+     * @return array
+     */
     public static function validate(Array $data) {
         $rules = [
             'name' => 'required|min:5|unique:users',
             'password' => 'required|confirmed',
             'email' => 'required|min:5|email|unique:users'
         ];
-
-        return \App\Helpers\Helpers::validate($data, $rules);
+        return Helpers::validate($data, $rules);
 
     }
 
