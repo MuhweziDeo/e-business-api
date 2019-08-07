@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\JWTHelper;
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class LoginController extends Controller
 {
@@ -18,22 +21,62 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
 
     /**
-     * Where to redirect users after login.
-     *
-     * @var string
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    protected $redirectTo = '/home';
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function login(Request $request)
     {
-        $this->middleware('guest')->except('logout');
+        $credentials = $request->only('email', 'password');
+
+        $token = JWTHelper::generateToken($credentials);
+
+        if (!$token) {
+           return response()->json([
+               'message' => 'Invalid Login credentials',
+               'success' => false
+           ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        return response()->json([
+            'access_token' => $token,
+            'message' => 'Login Successful',
+            'success' => false
+        ]);
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function logout()
+    {
+
+        auth()->logout();
+        return response()->json([
+            'message' => 'LogOut Successful',
+            'success' => false
+        ]);
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function me()
+    {
+
+        $user = auth()->user();
+
+        if(!$user) {
+            return response()->json([
+                'message' => 'Invalid Token',
+                'success' => false
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        return response()->json([
+            'data' => $user,
+            'success' => true
+        ]);
     }
 }

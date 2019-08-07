@@ -2,11 +2,21 @@
 
 namespace App\Http\Controllers\Profile;
 
+use App\Profile;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Repositories\ProfileRepository;
+use Illuminate\Http\Response;
 
 class ProfileController extends Controller
 {
+    public $profile_repositroy;
+
+    public function __construct(ProfileRepository $profileRepositroy)
+    {
+        $this->profile_repositroy = $profileRepositroy;
+        $this->middleware('profile')->except('index');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -15,6 +25,10 @@ class ProfileController extends Controller
     public function index()
     {
         //
+        $profiles = $this->profile_repositroy->findAndPaginate(10);
+        return response()->json([
+            'data' => $profiles
+        ]);
     }
 
     /**
@@ -44,7 +58,7 @@ class ProfileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show()
     {
         //
     }
@@ -67,9 +81,31 @@ class ProfileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $uuid)
     {
         //
+        $data = request()->only('first_name', 'last_name', 'image', 'city', 'country', 'location');
+
+        if(count($data) === 0) {
+            return response()->json([
+                'success' => 'false',
+                'message' => 'Please pass one value to update'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        $data['user_uuid'] = auth()->user()->uuid;
+        $profile = Profile::updateProfile($data);
+
+        if ($profile) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully'
+            ]);
+        }
+        return response()->json([
+            'success' => 'false',
+            'message' => 'Profile was not updated successfully'
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+
     }
 
     /**

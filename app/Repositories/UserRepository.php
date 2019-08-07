@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-
 use App\User;
 
 class UserRepository implements IBaseRepository
@@ -44,6 +43,11 @@ class UserRepository implements IBaseRepository
     {
 
         return User::orderBy('created_at', 'DESC')->paginate($paginateSize);
+    }
+
+    public function findOne($key, $value)
+    {
+        return User::where($key, $value)->first();
     }
 
 

@@ -3,12 +3,15 @@
 namespace App;
 
 use App\Helpers\Helpers;
+use App\Mail\EmailConfirmationMail;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
 
@@ -52,21 +55,49 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    /**
+     * @param $value
+     */
+    protected function setPasswordAttribute($value)
+    {
 
+        $this->attributes['password'] = bcrypt($value);
+    }
+
+    /**
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+
+        return [];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+
+    /**
+     * @return bool
+     */
     public function isAdmin()
     {
         return $this->admin === User::ADMIN_USER;
     }
 
+    /**
+     * @return bool
+     */
     public function isVerified()
     {
         return $this->verified === User::VERIFIED_USER;
     }
 
-    public static function generateVerificationToken()
-    {
-        return Str::random(40);
-    }
 
     /**
      * @param array $data
@@ -82,15 +113,36 @@ class User extends Authenticatable
 
     }
 
+    /**
+     * @param array $data
+     * @return mixed
+     */
     public static function createUser(Array $data)
     {
         $data['uuid'] = Str::random(20);
         return User::create($data);
     }
 
+    /**
+     * @return mixed
+     */
     public static function getUsers()
     {
         return User::orderBy('created_at', 'DESC')->paginate(10);
+    }
+
+    /**
+     * @param User $user
+     * @return mixed
+     */
+    public static function SendEmailVerification(User $user)
+    {
+        $token = auth()->login($user);
+        $email_verification_link  = env('ACTIVATION_DOMAIN') . "?token=$token";
+        dd($email_verification_link);
+        return Mail::to($user)->send(new EmailConfirmationMail($user->email, $user->name,
+            $email_verification_link));
+
     }
 
 

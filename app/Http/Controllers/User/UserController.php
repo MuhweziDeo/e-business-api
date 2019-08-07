@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Events\Registration;
+
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -60,8 +60,13 @@ class UserController extends Controller
             return response()->json([ 'errors' =>  $errors], Response::HTTP_BAD_REQUEST);
         }
         $data = $request->only('name', 'email', 'password');
+
         $user = User::createUser($data);
-        event(new Registration($user->email, $user->name));
+
+//        event(new Registration($user->email, $user->name));
+
+        User::SendEmailVerification($user);
+
         return response()->json([
             'data' => $user,
             'success' => true,

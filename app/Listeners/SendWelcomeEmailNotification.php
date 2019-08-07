@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\Registration;
-use App\Mail\WelcomeEmail;
+use App\Mail\WelcomeEmail as WelcomeEmailAlias;
 use Illuminate\Support\Facades\Mail;
 
 class SendWelcomeEmailNotification
@@ -28,6 +28,6 @@ class SendWelcomeEmailNotification
     {
         //
 
-        Mail::to($event->email)->send(new WelcomeEmail($event->name, $event->email));
+        Mail::to($event->email)->send(new WelcomeEmailAlias($event->name, $event->email));
     }
 }

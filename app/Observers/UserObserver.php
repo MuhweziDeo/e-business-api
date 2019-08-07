@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Profile;
 use App\User;
-use Illuminate\Support\Facades\Mail;
+
 
 class UserObserver
 {

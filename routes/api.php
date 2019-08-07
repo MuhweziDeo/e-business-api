@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,19 +13,33 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+
+Route::group(['prefix' => 'v1'], function() {
+    //Auth
+    Route::post('login', 'Auth\LoginController@login');
+    Route::post('me', 'Auth\LoginController@me');
+    Route::post('logout', 'Auth\LoginController@logout');
+
+    // Profile
+    Route::put('profiles/{uuid}', 'Profile\ProfileController@update');
+    Route::get('profiles/{uuid}', 'Profile\ProfileController@show');
+    Route::get('profiles', 'Profile\ProfileController@index');
+
+
+    Route::resource('buyers', 'Buyer\BuyerController', ['only' => ['index', 'show']]);
+
+    Route::resource('sellers', 'Seller\SellerController', ['only' => ['index', 'show']]);
+
+    Route::resource('products', 'Product\ProductController', ['only' => ['index', 'show']]);
+
+    Route::resource('transactions', 'Transaction\TransactionController', ['only' => ['index', 'show']]);
+
+    Route::resource('categories', 'Category\CategoryController', ['except' => ['create', 'edit']]);
+
+    Route::resource('users', 'User\UserController', ['except' => ['create', 'edit']]);
+
+    Route::put('confirmation', 'Auth\VerificationController@confirmEmail');
+
 });
 
 
-Route::resource('buyers', 'Buyer\BuyerController', ['only' => ['index', 'show']]);
-
-Route::resource('sellers', 'Seller\SellerController', ['only' => ['index', 'show']]);
-
-Route::resource('products', 'Product\ProductController', ['only' => ['index', 'show']]);
-
-Route::resource('transactions', 'Transaction\TransactionController', ['only' => ['index', 'show']]);
-
-Route::resource('categories', 'Category\CategoryController', ['except' => ['create', 'edit']]);
-
-Route::resource('users', 'User\UserController', ['except' => ['create', 'edit']]);

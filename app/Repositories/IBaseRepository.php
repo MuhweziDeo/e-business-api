@@ -18,5 +18,7 @@ interface IBaseRepository
 
     public function findAndPaginate($paginateSize);
 
+    public function findOne($key, $value);
+
 
 }

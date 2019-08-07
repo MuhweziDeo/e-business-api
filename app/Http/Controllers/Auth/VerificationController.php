@@ -3,39 +3,45 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\VerifiesEmails;
+use App\Profile;
+use App\User;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+
 
 class VerificationController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Email Verification Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller is responsible for handling email verification for any
-    | user that recently registered with the application. Emails may also
-    | be re-sent if the user didn't receive the original email message.
-    |
-    */
+   public function confirmEmail(Request $request)
+   {
 
-    use VerifiesEmails;
+       $user = auth()->user();
+       if (!$user || $user->verified === User::VERIFIED_USER) {
 
-    /**
-     * Where to redirect users after verification.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('signed')->only('verify');
-        $this->middleware('throttle:6,1')->only('verify', 'resend');
-    }
+            $message = $user->verified ? 'Account already verified' :
+                'There is a problem with the link';
+           return response()->json([
+               'message' => $message,
+               'success' => false
+           ], \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST);
+       }
+       $user->verified = User::VERIFIED_USER;
+       $user->email_verified_at = Carbon::now();
+       $user->save();
+       $validate = Profile::validate(request()->all());
+       if($validate['errors']) {
+           return response()->json($validate['errors']);
+       }
+       $data = request()->only('first_name', 'last_name', 'image', 'city', 'country', 'location');
+       $profile = [];
+       if(count($data) > 0) {
+            $data['user_uuid'] = $user->uuid;
+            $profile = Profile::updateProfile($data);
+       }
+       $message = $profile ? 'Account activated and Profile updated succesfully' :
+                             'Account activated succesfully';
+       return response()->json([
+           'message' => $message,
+           'success' => true
+       ]);
+   }
 }
