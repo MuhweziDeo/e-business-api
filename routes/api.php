@@ -19,6 +19,9 @@ Route::group(['prefix' => 'v1'], function() {
     Route::post('login', 'Auth\LoginController@login');
     Route::post('me', 'Auth\LoginController@me');
     Route::post('logout', 'Auth\LoginController@logout');
+    Route::post('password-reset/request','Auth\ResetPasswordController@reset_password_request');
+    Route::put('password-reset/confirm','Auth\ResetPasswordController@reset_password_confirm');
+    Route::put('confirmation', 'Auth\VerificationController@confirmEmail');
 
     // Profile
     Route::put('profiles/{uuid}', 'Profile\ProfileController@update');
@@ -26,19 +29,20 @@ Route::group(['prefix' => 'v1'], function() {
     Route::get('profiles', 'Profile\ProfileController@index');
 
 
+    //Resources
     Route::resource('buyers', 'Buyer\BuyerController', ['only' => ['index', 'show']]);
 
     Route::resource('sellers', 'Seller\SellerController', ['only' => ['index', 'show']]);
 
-    Route::resource('products', 'Product\ProductController', ['only' => ['index', 'show']]);
+    Route::resource('products', 'Product\ProductController');
 
-    Route::resource('transactions', 'Transaction\TransactionController', ['only' => ['index', 'show']]);
+    Route::resource('transactions', 'Transaction\TransactionController', ['only' => ['index', 'show', 'store', 'update']]);
 
-    Route::resource('categories', 'Category\CategoryController', ['except' => ['create', 'edit']]);
+    Route::resource('categories', 'Category\CategoryController', ['only' => ['store', 'edit', 'index']]);
 
     Route::resource('users', 'User\UserController', ['except' => ['create', 'edit']]);
 
-    Route::put('confirmation', 'Auth\VerificationController@confirmEmail');
+
 
 });
 

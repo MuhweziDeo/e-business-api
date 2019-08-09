@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Helpers\JWTHelper;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Repositories\ProfileRepository;
 use Symfony\Component\HttpFoundation\Response;
 
 
 class LoginController extends Controller
 {
+
     /*
     |--------------------------------------------------------------------------
     | Login Controller
@@ -21,7 +23,13 @@ class LoginController extends Controller
     |
     */
 
+    public $profile_repository;
 
+    public function __construct(ProfileRepository $profileRepository)
+    {
+        $this->profile_repository = $profileRepository;
+
+    }
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -66,7 +74,6 @@ class LoginController extends Controller
     {
 
         $user = auth()->user();
-
         if(!$user) {
             return response()->json([
                 'message' => 'Invalid Token',
@@ -74,8 +81,10 @@ class LoginController extends Controller
             ], Response::HTTP_UNAUTHORIZED);
         }
 
+        $profile = $this->profile_repository->findOne('user_uuid', $user->uuid);
+
         return response()->json([
-            'data' => $user,
+            'data' => $profile,
             'success' => true
         ]);
     }

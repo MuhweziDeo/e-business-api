@@ -9,7 +9,7 @@ class ProfileRepository implements IBaseRepository
 {
     public function findOne($key, $value)
     {
-        return Profile::where($key, $value)->first();
+        return Profile::with('user')->where($key, $value)->first();
     }
 
     public function findAll()
@@ -19,7 +19,7 @@ class ProfileRepository implements IBaseRepository
 
     public function findAndPaginate($paginateSize)
     {
-        return Profile::orderBy('created_at', 'DESC')->paginate($paginateSize);
+        return Profile::with('user')->paginate(10);
     }
 
     public function findOneById($id)

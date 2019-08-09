@@ -61,6 +61,10 @@ class ProfileController extends Controller
     public function show()
     {
         //
+        $profile = $this->profile_repositroy->findOne('user_uuid', request()->uuid);
+        return response()->json([
+            'data' => $profile
+        ]);
     }
 
     /**
@@ -81,11 +85,11 @@ class ProfileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $uuid)
+    public function update()
     {
         //
+        
         $data = request()->only('first_name', 'last_name', 'image', 'city', 'country', 'location');
-
         if(count($data) === 0) {
             return response()->json([
                 'success' => 'false',

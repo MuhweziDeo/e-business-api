@@ -3,6 +3,7 @@
 
 namespace App\Helpers;
 
+use App\User;
 
 class JWTHelper
 {
@@ -13,13 +14,17 @@ class JWTHelper
      */
     static function generateToken($credentials)
     {
-
         return auth()->attempt($credentials);
     }
 
-    static function decodeToken($data)
+    static function decodeToken()
     {
+        return auth()->user();
+    }
 
+    static function generateTokenFromUser(User $user)
+    {
+        return auth()->login($user);
     }
 
 }

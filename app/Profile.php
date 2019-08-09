@@ -19,6 +19,11 @@ class Profile extends Model
         'location'
         ];
 
+
+    public function user()
+    {
+        return $this->hasOne(\App\User::class, 'uuid', 'user_uuid');
+    }
     /**
      * @param array $data
      * @return array
@@ -46,5 +51,5 @@ class Profile extends Model
                         ->update($data);
     }
 
-    
+
 }

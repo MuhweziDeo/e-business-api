@@ -26,7 +26,6 @@ class ProfileMiddleware
      */
     public function handle($request, Closure $next)
     {
-        // dd($request->method());
 
         $profile = $this->profile_repository->findOne('user_uuid', $request->uuid);
         if (!$profile) {

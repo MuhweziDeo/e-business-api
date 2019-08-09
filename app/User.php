@@ -9,7 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-
+use App\Mail\PasswordResetEmail;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -64,6 +64,11 @@ class User extends Authenticatable implements JWTSubject
         $this->attributes['password'] = bcrypt($value);
     }
 
+    public function profile()
+    {
+        return $this->hasOne(Profile::class, 'user_uuid', 'uuid');
+    }
+
     /**
      * @return array
      */
@@ -113,6 +118,13 @@ class User extends Authenticatable implements JWTSubject
 
     }
 
+    public static function validate_password_change($data) {
+        $rules = [
+            'password' => 'required|confirmed',
+        ];
+        return Helpers::validate($data, $rules);
+    }
+
     /**
      * @param array $data
      * @return mixed
@@ -121,6 +133,15 @@ class User extends Authenticatable implements JWTSubject
     {
         $data['uuid'] = Str::random(20);
         return User::create($data);
+    }
+
+    public static function update_user(Array $data)
+    {
+        if ($data['password']) {
+            $data['password'] = bcrypt($data['password']);
+        }
+        return User::where('uuid', $data['uuid'])
+                ->update($data);
     }
 
     /**
@@ -138,12 +159,24 @@ class User extends Authenticatable implements JWTSubject
     public static function SendEmailVerification(User $user)
     {
         $token = auth()->login($user);
-        $email_verification_link  = env('ACTIVATION_DOMAIN') . "?token=$token";
+        $email_verification_link  = env('ACTIVATION_DOMAIN'). "confirmation" . "?token=$token";
         dd($email_verification_link);
         return Mail::to($user)->send(new EmailConfirmationMail($user->email, $user->name,
             $email_verification_link));
 
     }
+
+    public static function sendResetPasswordEmail(User $user)
+    {
+        $token = auth()->login($user);
+        $password_reset_link  = env('ACTIVATION_DOMAIN'). "password-reset/confirm" . "?token=$token";
+        dd($password_reset_link);
+        return Mail::to($user)->send(new PasswordResetEmail($user,
+            $password_reset_link));
+
+    }
+
+
 
 
 }

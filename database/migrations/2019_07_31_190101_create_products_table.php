@@ -20,13 +20,16 @@ class CreateProductsTable extends Migration
             $table->integer('quantity')->unsigned();
             $table->string('status')->default(\App\Product::UNAVAILABLE_PRODUCT);
             $table->string('image');
-            $table->unsignedBigInteger('seller_id');
+            $table->string('seller_uuid');
+            $table->unsignedBigInteger('category_id')->nullable();
             $table->timestamps();
 
-//
-            $table->foreign('seller_id')->references('id')->on('users')
+
+            $table->foreign('seller_uuid')->references('uuid')->on('users')
                     ->onDelete('cascade');
-//
+
+            $table->foreign('category_id')->references('id')->on('categories')
+                ->onDelete('cascade');
 
 
         });
