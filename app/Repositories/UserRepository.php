@@ -49,6 +49,10 @@ class UserRepository implements IBaseRepository
     {
         return User::where($key, $value)->first();
     }
+    public function findAndFilter($filter)
+    {
+
+    }
 
 
 }

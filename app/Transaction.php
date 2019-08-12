@@ -14,7 +14,8 @@ class Transaction extends Model
     protected $fillable = [
         'quantity',
         'buyer_id',
-        'product_id'
+        'product_id',
+        'status'
     ];
 
     public function buyer()
@@ -39,5 +40,15 @@ class Transaction extends Model
     public static function canTransact(User $buyer, Product $product)
     {
         return $buyer->uuid === $product->seller_uuid;
+    }
+
+    public static function updateTransaction(Transaction $transaction, $data)
+    {
+        return  $transaction->update($data);
+    }
+
+    public static function deleteTransaction(Transaction $transaction)
+    {
+        return $transaction->delete();
     }
 }

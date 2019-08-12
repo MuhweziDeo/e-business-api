@@ -160,7 +160,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $token = auth()->login($user);
         $email_verification_link  = env('ACTIVATION_DOMAIN'). "confirmation" . "?token=$token";
-        dd($email_verification_link);
+//        dd($email_verification_link);
         return Mail::to($user)->send(new EmailConfirmationMail($user->email, $user->name,
             $email_verification_link));
 
@@ -170,7 +170,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $token = auth()->login($user);
         $password_reset_link  = env('ACTIVATION_DOMAIN'). "password-reset/confirm" . "?token=$token";
-        dd($password_reset_link);
+//        dd($password_reset_link);
         return Mail::to($user)->send(new PasswordResetEmail($user,
             $password_reset_link));
 

@@ -18,6 +18,7 @@ class CreateTransactionsTable extends Migration
             $table->integer('quantity')->unsigned();
             $table->unsignedBigInteger('buyer_id');
             $table->unsignedBigInteger('product_id');
+            $table->string('status')->default('InProgress');
             $table->timestamps();
 
             $table->foreign('buyer_id')->references('id')->on('users');

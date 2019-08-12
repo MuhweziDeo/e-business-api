@@ -26,4 +26,9 @@ class ProfileRepository implements IBaseRepository
     {
         return Profile::findById($id);
     }
+
+    public function findAndFilter($filter)
+    {
+
+    }
 }

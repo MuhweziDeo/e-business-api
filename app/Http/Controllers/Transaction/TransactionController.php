@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Transaction;
 
+use App\Helpers\PermissionHelper;
 use App\Transaction;
 use App\Helpers\Helpers;
 use Illuminate\Http\Request;
@@ -14,14 +15,14 @@ use App\Product;
 class TransactionController extends Controller
 {
     public $transaction_repository;
-    public $product_respository;
+    public $product_repository;
 
     public function __construct(TransactionRepository $transactionRepository,
                                     ProductRepository $productRepository)
     {
         $this->middleware('authorization');
         $this->transaction_repository = $transactionRepository;
-        $this->product_respository = $productRepository;
+        $this->product_repository = $productRepository;
     }
     /**
      * Display a listing of the resource.
@@ -30,18 +31,18 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        //
-        $transactions = $this->transaction_repository->findAndPaginate(10);
+
+        $transactions = auth()->user()->admin !== "false" ? $this->transaction_repository->findAll() :
+            $this->transaction_repository->findAndFilter(auth()->user()->id);
 
         return response()->json([
-            $transactions
+            'data' => $transactions
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store()
@@ -54,7 +55,7 @@ class TransactionController extends Controller
             ]);
         }
         $id = request()->only('product_id');
-        $product = $this->product_respository->findOneById($id);
+        $product = $this->product_repository->findOneById($id);
         if(!$product) {
             return response()->json([
                 'message' => 'Product not found',
@@ -74,7 +75,7 @@ class TransactionController extends Controller
 
             $message = $product->status === Product::UNAVAILABLE_PRODUCT ?
             'Sorry this Product is not unavailable' :
-                "The quantiy order for is greater than what is avaliable";
+                "The quantity order for is greater than what is available";
 
             return response()->json([
                 'message' => $message,
@@ -83,6 +84,8 @@ class TransactionController extends Controller
         }
         $remaining_product_quantity = $product->quantity - request()->only('quantity')['quantity'];
         $product->quantity = $remaining_product_quantity;
+        $product->status = $remaining_product_quantity === 0 ? Product::UNAVAILABLE_PRODUCT :
+                            Product::AVAILABLE_PRODUCT;
         $product->save();
         $data = request()->only('quantity', 'product_id');
         $data['buyer_id'] = auth()->user()->id;
@@ -103,7 +106,16 @@ class TransactionController extends Controller
      */
     public function show($id)
     {
-        //
+        $transaction = $this->transaction_repository->findOneById($id);
+        if(!$transaction) {
+            return response()->json([
+                'message' => 'Transaction not found',
+                'success' => false
+            ], Response::HTTP_NOT_FOUND);
+        }
+        return response()->json([
+            'data' => $transaction
+        ]);
     }
 
     /**
@@ -114,7 +126,8 @@ class TransactionController extends Controller
      */
     public function edit($id)
     {
-        //
+
+
     }
 
     /**
@@ -126,7 +139,28 @@ class TransactionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $transaction = $this->transaction_repository->findOneById($id);
+
+        if(!$transaction) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $isOwner = auth()->user()->id === $transaction->buyer_id;
+        if(!$isOwner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Permission denied'
+            ]);
+        }
+        $data = $request->only('product_id', 'status', 'quantity');
+        $d = Transaction::updateTransaction($transaction, $data);
+        return response()->json([
+           'message' => $d ? "Transaction updated successfully" : "Transaction not updated",
+           'success' => $d
+        ],$d ? Response::HTTP_OK : Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -137,6 +171,26 @@ class TransactionController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $transaction = $this->transaction_repository->findOneById($id);
+
+        if(!$transaction) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+        $isOwner = auth()->user()->id === $transaction->buyer_id;
+        if(!$isOwner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Permission denied'
+            ]);
+        }
+        $d = Transaction::deleteTransaction($transaction);
+        return response()->json([
+            'message' => $d ? "Transaction deleted successfully" : "Transaction not deleted",
+            'success' => $d
+        ],$d ? Response::HTTP_OK : Response::HTTP_INTERNAL_SERVER_ERROR);
+
     }
 }

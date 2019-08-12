@@ -31,4 +31,11 @@ class CategoryRepository implements IBaseRepository
     {
 
     }
+
+    public function findAndFilter($filter)
+    {
+        // TODO: Implement findAndFilter() method.
+    }
+
+    
 }

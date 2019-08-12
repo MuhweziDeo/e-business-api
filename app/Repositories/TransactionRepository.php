@@ -14,16 +14,20 @@ class TransactionRepository implements IBaseRepository
 
     public function findAll()
     {
-
+        return Transaction::all();
     }
 
     public function findOneById($id)
     {
-
+        return Transaction::find($id);
     }
 
     public function findOne($key, $value)
     {
 
+    }
+    public function findAndFilter($filter)
+    {
+        return Transaction::where('buyer_id', $filter)->get();
     }
 }

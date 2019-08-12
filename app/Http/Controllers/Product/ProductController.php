@@ -98,7 +98,7 @@ class ProductController extends Controller
                 'errors' => Helpers::formatErrors($validate)
             ],Response::HTTP_BAD_REQUEST);
         }
-        $data = $request->only('name', 'description', 'category_id', 'quantity', 'image');
+        $data = $request->only('name', 'description', 'category_id', 'quantity', 'image', 'status');
 
         Product::updateProduct($request->product, $data );
 

@@ -20,5 +20,7 @@ interface IBaseRepository
 
     public function findOne($key, $value);
 
+    public function findAndFilter($filter);
+
 
 }

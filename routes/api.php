@@ -36,7 +36,8 @@ Route::group(['prefix' => 'v1'], function() {
 
     Route::resource('products', 'Product\ProductController');
 
-    Route::resource('transactions', 'Transaction\TransactionController', ['only' => ['index', 'show', 'store', 'update']]);
+    Route::resource('transactions', 'Transaction\TransactionController', ['only' => ['index', 'show',
+        'store', 'update', 'destroy']]);
 
     Route::resource('categories', 'Category\CategoryController', ['only' => ['store', 'edit', 'index']]);
 
